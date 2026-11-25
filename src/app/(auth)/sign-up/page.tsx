@@ -363,7 +363,7 @@ export default function SignUpPage() {
         <Button
           type="submit"
           disabled={isDisabled}
-          className="h-12 w-full rounded-full font-semibold transition-colors"
+          className="h-12 w-full rounded-full font-semibold transition-colors cursor-pointer"
         >
           {isLoading ? (
             <>

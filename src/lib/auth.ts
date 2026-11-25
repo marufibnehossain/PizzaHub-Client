@@ -38,10 +38,34 @@ export const auth = betterAuth({
     user: {
         additionalFields: {
             role: {
-            type: "string",
-            required: false,
-            defaultValue: "customer",
-            input: false,
+                type: "string",
+                required: false,
+                defaultValue: "customer",
+                input: false,
+            },
+            businessName: {
+                type: "string",
+                required: false,
+                input: false,
+            },
+
+            subscriptionPlan: {
+                type: "string",
+                required: false,
+                input: false,
+            },
+
+            subscriptionExpiresAt: {
+                type: "date",
+                required: false,
+                input: false,
+            },
+
+            isBlocked: {
+                type: "boolean",
+                required: false,
+                defaultValue: false,
+                input: false,
             },
         },
     },
@@ -74,6 +98,13 @@ export const auth = betterAuth({
                 data: {
                     ...user,
                     role,
+                    isBlocked: false,
+
+                    ...(role === "vendor"
+                    ? {
+                        subscriptionPlan: "free",
+                        }
+                    : {}),
                 },
                 };
             },
