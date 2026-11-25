@@ -3,7 +3,8 @@
 import { authClient } from "../../lib/auth-client";
 import { Button } from "../../components/ui/button";
 import type { UserRole, RoleTestResponse } from "../../types/auth";
-import type { CreateMenuItemInput, MenuItemResponse } from "../../types/menu";
+import type { CreateMenuItemInput, MenuItemResponse, MenuItemsResponse } from "../../types/menu";
+
 
 export default function TestAuthPage() {
   const {
@@ -118,6 +119,39 @@ const testCreateMenuItem = async (): Promise<void> => {
     }
 };
 
+const testGetMyMenuItems = async (): Promise<void> => {
+    try {
+        const { data, error } = await authClient.token();
+
+        if (error || !data?.token) {
+            console.error("Failed to retrieve JWT.");
+            return;
+        }
+
+        const res = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/menu-items/my-items`,
+            {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${data.token}`,
+                },
+            }
+        );
+
+        const result: MenuItemsResponse = await res.json();
+
+        console.log("Status:", res.status);
+        console.log("Response:", result);
+
+        if (res.ok && result.success) {
+            console.table(result.data);
+        }
+
+    } catch (error: unknown) {
+        console.error("Get menu items test failed:", error);
+    }
+};
+
   return (
     <div>
       <h1>Authentication Test</h1>
@@ -157,6 +191,12 @@ const testCreateMenuItem = async (): Promise<void> => {
     onClick={testCreateMenuItem}
 >
     Test Create Menu Item
+</Button>
+<Button
+    variant="outline"
+    onClick={testGetMyMenuItems}
+>
+    Test Get My Menu Items
 </Button>
 </div>
     </div>
