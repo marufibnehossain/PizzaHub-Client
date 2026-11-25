@@ -2,10 +2,8 @@
 
 import { authClient } from "../../lib/auth-client";
 import { Button } from "../../components/ui/button";
-import type {
-  UserRole,
-  RoleTestResponse,
-} from "../../types/auth";
+import type { UserRole, RoleTestResponse } from "../../types/auth";
+import type { CreateMenuItemInput, MenuItemResponse } from "../../types/menu";
 
 export default function TestAuthPage() {
   const {
@@ -78,6 +76,48 @@ const testRole = async (
   }
 };
 
+const testCreateMenuItem = async (): Promise<void> => {
+    try {
+        const { data, error } = await authClient.token();
+
+        if (error || !data?.token) {
+            console.error("Failed to retrieve JWT.");
+            return;
+        }
+
+        const menuItem: CreateMenuItemInput = {
+            itemName: "Classic Margherita",
+            category: "Classic Pizzas",
+            description:
+                "Fresh mozzarella, tomato sauce and basil on a traditional pizza crust.",
+            price: 650,
+            location: "Chattogram",
+            images: [
+                "https://example.com/margherita.jpg",
+            ],
+        };
+
+        const res = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/menu-items`,
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${data.token}`,
+                },
+                body: JSON.stringify(menuItem),
+            }
+        );
+
+        const result: MenuItemResponse = await res.json();
+
+        console.log("Status:", res.status);
+        console.log("Response:", result);
+    } catch (error: unknown) {
+        console.error("Create menu item test failed:", error);
+    }
+};
+
   return (
     <div>
       <h1>Authentication Test</h1>
@@ -112,6 +152,12 @@ const testRole = async (
   >
     Test Customer API
   </Button>
+  <Button
+    variant="outline"
+    onClick={testCreateMenuItem}
+>
+    Test Create Menu Item
+</Button>
 </div>
     </div>
   );
