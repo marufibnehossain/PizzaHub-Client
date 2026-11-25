@@ -2,6 +2,7 @@ import { betterAuth } from "better-auth";
 import { mongodbAdapter } from "@better-auth/mongo-adapter";
 import { MongoClient } from "mongodb";
 import { jwt } from "better-auth/plugins";
+import { APIError } from "better-auth/api";
 
 const client = new MongoClient(process.env.MONGODB_URI!);
 
@@ -31,6 +32,52 @@ export const auth = betterAuth({
         github: {
             clientId: process.env.GITHUB_CLIENT_ID!,
             clientSecret: process.env.GITHUB_CLIENT_SECRET!,
+        },
+    },
+
+    user: {
+        additionalFields: {
+            role: {
+            type: "string",
+            required: false,
+            defaultValue: "customer",
+            input: false,
+            },
+        },
+    },
+
+    databaseHooks: {
+        user: {
+            create: {
+            before: async (user, ctx) => {
+                let role = "customer";
+
+                if (ctx?.path === "/sign-up/email") {
+                const selectedRole = ctx.body?.registrationRole;
+
+                if (
+                    selectedRole !== undefined &&
+                    selectedRole !== "customer" &&
+                    selectedRole !== "vendor"
+                ) {
+                    throw new APIError("BAD_REQUEST", {
+                    message: "Invalid registration role.",
+                    });
+                }
+
+                if (selectedRole === "vendor") {
+                    role = "vendor";
+                }
+                }
+
+                return {
+                data: {
+                    ...user,
+                    role,
+                },
+                };
+            },
+            },
         },
     },
 

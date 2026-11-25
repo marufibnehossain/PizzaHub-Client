@@ -2,6 +2,10 @@
 
 import { authClient } from "../../lib/auth-client";
 import { Button } from "../../components/ui/button";
+import type {
+  UserRole,
+  RoleTestResponse,
+} from "../../types/auth";
 
 export default function TestAuthPage() {
   const {
@@ -45,6 +49,35 @@ export default function TestAuthPage() {
   }
 };
 
+const testRole = async (
+  role: UserRole
+): Promise<void> => {
+  try {
+    const { data, error } = await authClient.token();
+
+    if (error || !data?.token) {
+      console.error("Failed to retrieve JWT.");
+      return;
+    }
+
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/test-${role}`,
+      {
+        headers: {
+          Authorization: `Bearer ${data.token}`,
+        },
+      }
+    );
+
+    const result: RoleTestResponse = await res.json();
+
+    console.log(`${role} endpoint status:`, res.status);
+    console.log("Response:", result);
+  } catch (error: unknown) {
+    console.error("Role test failed:", error);
+  }
+};
+
   return (
     <div>
       <h1>Authentication Test</h1>
@@ -57,6 +90,30 @@ export default function TestAuthPage() {
       <Button onClick={testProtectedRoute}>
   Test Protected API
 </Button>
+<p>Role: {session?.user.role}</p>
+<div className="flex flex-wrap gap-3">
+  <Button
+    variant="outline"
+    onClick={() => testRole("admin")}
+  >
+    Test Admin API
+  </Button>
+
+  <Button
+    variant="outline"
+    onClick={() => testRole("vendor")}
+  >
+    Test Vendor API
+  </Button>
+
+  <Button
+    variant="outline"
+    onClick={() => testRole("customer")}
+  >
+    Test Customer API
+  </Button>
+</div>
     </div>
   );
+  
 }
