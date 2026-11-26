@@ -4,33 +4,14 @@ import { useState } from "react";
 import type { FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import {
-  UserRound,
-  Mail,
-  ShoppingBag,
-  Store,
-  ArrowRight,
-  LoaderCircle,
-  CircleAlert,
-} from "lucide-react";
+import { UserRound, Mail, ShoppingBag, Store, ArrowRight, LoaderCircle, CircleAlert } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-
 import { authClient } from "../../../lib/auth-client";
-
-import type {
-  RegistrationRole,
-  SocialProvider,
-} from "../../../types/auth";
-
+import type { RegistrationRole, SocialProvider } from "../../../types/auth";
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
 import { Label } from "../../../components/ui/label";
-
-import {
-  RadioGroup,
-  RadioGroupItem,
-} from "../../../components/ui/radio-group";
-
+import { RadioGroup, RadioGroupItem } from "../../../components/ui/radio-group";
 import AuthLayout from "../../../components/auth/AuthLayout";
 import PasswordInput from "../../../components/auth/PasswordInput";
 import SocialLogin from "../../../components/auth/SocialLogin";
@@ -76,33 +57,20 @@ export default function SignUpPage() {
     confirmPassword: "",
   });
 
-  const [role, setRole] =
-    useState<RegistrationRole>("customer");
-
+  const [role, setRole] = useState<RegistrationRole>("customer");
   const [message, setMessage] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [socialLoading, setSocialLoading] = useState<SocialProvider | null>(null);
+  const isDisabled: boolean = isLoading || socialLoading !== null;
 
-  const [isLoading, setIsLoading] =
-    useState<boolean>(false);
-
-  const [socialLoading, setSocialLoading] =
-    useState<SocialProvider | null>(null);
-
-  const isDisabled: boolean =
-    isLoading || socialLoading !== null;
-
-  const handleChange = (
-    field: keyof SignUpForm,
-    value: string
-  ): void => {
+  const handleChange = (field: keyof SignUpForm, value: string): void => {
     setFormData((previous) => ({
       ...previous,
       [field]: value,
     }));
   };
 
-  const handleSubmit = async (
-    e: FormEvent<HTMLFormElement>
-  ): Promise<void> => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
     setMessage("");
 
@@ -147,7 +115,7 @@ export default function SignUpPage() {
         return;
       }
 
-      router.push("/test-auth");
+      router.replace("/dashboard");
     } catch {
       setMessage(
         "Something went wrong. Please try again."
@@ -157,16 +125,14 @@ export default function SignUpPage() {
     }
   };
 
-  const handleSocialLogin = async (
-    provider: SocialProvider
-  ): Promise<void> => {
+  const handleSocialLogin = async (provider: SocialProvider): Promise<void> => {
     setMessage("");
     setSocialLoading(provider);
 
     try {
       const { error } = await authClient.signIn.social({
         provider,
-        callbackURL: "/test-auth",
+        callbackURL: "/dashboard",
       });
 
       if (error) {
@@ -193,8 +159,6 @@ export default function SignUpPage() {
         onSubmit={handleSubmit}
         className="space-y-5"
       >
-
-        {/* Full name */}
         <div className="space-y-2">
           <Label htmlFor="name">Full name</Label>
 
@@ -216,8 +180,6 @@ export default function SignUpPage() {
             />
           </div>
         </div>
-
-        {/* Email */}
         <div className="space-y-2">
           <Label htmlFor="email">Email address</Label>
 
@@ -239,8 +201,6 @@ export default function SignUpPage() {
             />
           </div>
         </div>
-
-        {/* Password fields */}
         <div className="grid gap-4 sm:grid-cols-2">
 
           <div className="space-y-2">
@@ -283,8 +243,6 @@ export default function SignUpPage() {
             />
           </div>
         </div>
-
-        {/* Role selection */}
         <div className="space-y-3">
           <Label id="registration-role-label">
             How would you like to join?
@@ -347,8 +305,6 @@ export default function SignUpPage() {
             })}
           </RadioGroup>
         </div>
-
-        {/* Error message */}
         {message && (
           <div
             role="alert"
@@ -358,8 +314,6 @@ export default function SignUpPage() {
             <p>{message}</p>
           </div>
         )}
-
-        {/* Register button */}
         <Button
           type="submit"
           disabled={isDisabled}
@@ -378,22 +332,17 @@ export default function SignUpPage() {
           )}
         </Button>
       </form>
-
-      {/* Social authentication */}
       <div className="mt-6">
         <SocialLogin
           onSocialLogin={handleSocialLogin}
           loadingProvider={socialLoading}
           disabled={isDisabled}
         />
-
         <p className="mt-3 text-center text-xs leading-relaxed text-muted-foreground">
           New accounts created with Google or GitHub
           are registered as customers.
         </p>
       </div>
-
-      {/* Sign in link */}
       <p className="mt-6 text-center text-sm text-muted-foreground">
         Already have an account?{" "}
         <Link

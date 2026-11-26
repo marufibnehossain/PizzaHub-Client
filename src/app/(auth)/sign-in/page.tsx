@@ -30,33 +30,21 @@ interface SignInForm {
 export default function SignInPage() {
   const router = useRouter();
 
-  const [formData, setFormData] = useState<SignInForm>({
-    email: "",
-    password: "",
-  });
+  const [formData, setFormData] = useState<SignInForm>({ email: "", password: "" });
 
   const [message, setMessage] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [socialLoading, setSocialLoading] = useState<SocialProvider | null>(null);
+  const isDisabled: boolean = isLoading || socialLoading !== null;
 
-  const [socialLoading, setSocialLoading] =
-    useState<SocialProvider | null>(null);
-
-  const isDisabled: boolean =
-    isLoading || socialLoading !== null;
-
-  const handleChange = (
-    field: keyof SignInForm,
-    value: string
-  ): void => {
+  const handleChange = (field: keyof SignInForm, value: string): void => {
     setFormData((previous) => ({
       ...previous,
       [field]: value,
     }));
   };
 
-  const handleSubmit = async (
-    e: FormEvent<HTMLFormElement>
-  ): Promise<void> => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
     e.preventDefault();
 
     setMessage("");
@@ -73,7 +61,7 @@ export default function SignInPage() {
         return;
       }
 
-      router.push("/test-auth");
+      router.replace("/dashboard");
     } catch {
       setMessage(
         "Something went wrong. Please try again."
@@ -83,27 +71,21 @@ export default function SignInPage() {
     }
   };
 
-  const handleSocialLogin = async (
-    provider: SocialProvider
-  ): Promise<void> => {
+  const handleSocialLogin = async (provider: SocialProvider): Promise<void> => {
     setMessage("");
     setSocialLoading(provider);
 
     try {
       const { error } = await authClient.signIn.social({
         provider,
-        callbackURL: "/test-auth",
+        callbackURL: "/dashboard",
       });
 
       if (error) {
-        setMessage(
-          error.message || "Social authentication failed."
-        );
+        setMessage(error.message || "Social authentication failed.");
       }
     } catch {
-      setMessage(
-        "Something went wrong. Please try again."
-      );
+      setMessage("Something went wrong. Please try again.");
     } finally {
       setSocialLoading(null);
     }
@@ -119,8 +101,6 @@ export default function SignInPage() {
         onSubmit={handleSubmit}
         className="space-y-5"
       >
-
-        {/* Email */}
         <div className="space-y-2">
           <Label htmlFor="email">
             Email address
@@ -145,7 +125,6 @@ export default function SignInPage() {
           </div>
         </div>
 
-        {/* Password */}
         <div className="space-y-2">
           <Label htmlFor="password">Password</Label>
 
@@ -162,7 +141,6 @@ export default function SignInPage() {
           />
         </div>
 
-        {/* Error message */}
         {message && (
           <div
             role="alert"
@@ -173,7 +151,6 @@ export default function SignInPage() {
           </div>
         )}
 
-        {/* Submit button */}
         <Button
           type="submit"
           disabled={isDisabled}
@@ -193,7 +170,6 @@ export default function SignInPage() {
         </Button>
       </form>
 
-      {/* Social authentication */}
       <div className="mt-7">
         <SocialLogin
           onSocialLogin={handleSocialLogin}
@@ -202,7 +178,6 @@ export default function SignInPage() {
         />
       </div>
 
-      {/* Sign up link */}
       <p className="mt-7 text-center text-sm text-muted-foreground">
         New to PizzaHub?{" "}
         <Link
