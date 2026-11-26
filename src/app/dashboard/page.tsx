@@ -1,30 +1,14 @@
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
 import Link from "next/link";
 import { ArrowRight, Store, ShoppingBag, ShieldCheck, UserRound } from "lucide-react";
-import { auth } from "../../lib/auth";
+import { requireAuth } from "../../lib/require-auth";
 
 export default async function DashboardPage() {
-    const session = await auth.api.getSession({
-        headers: await headers(),
-    });
+    const user = await requireAuth();
 
-    if (!session) {
-        redirect("/sign-in");
-    }
-
-    if (session.user.isBlocked === true) {
-        redirect("/");
-    }
-
-    const role = session.user.role;
-
-    if (role !== "customer" && role !== "vendor" && role !== "admin") {
-        redirect("/");
-    }
+    const role = user.role;
 
     const firstName =
-        session.user.name.trim().split(/\s+/)[0] || "there";
+        user.name.trim().split(/\s+/)[0] || "there";
 
     const isVendor = role === "vendor";
     const isAdmin = role === "admin";
@@ -118,7 +102,7 @@ export default async function DashboardPage() {
                             </dt>
 
                             <dd className="mt-1 font-medium">
-                                {session.user.name}
+                                {user.name}
                             </dd>
                         </div>
 
@@ -128,7 +112,7 @@ export default async function DashboardPage() {
                             </dt>
 
                             <dd className="mt-1 break-all font-medium">
-                                {session.user.email}
+                                {user.email}
                             </dd>
                         </div>
                     </dl>
