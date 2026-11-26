@@ -53,3 +53,8 @@ export interface MenuItemsResponse {
   message: string;
   data: MenuItem[];
 }
+
+export interface DeleteMenuItemResponse {
+    success: boolean;
+    message: string;
+}

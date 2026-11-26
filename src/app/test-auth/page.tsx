@@ -3,15 +3,16 @@
 import { authClient } from "../../lib/auth-client";
 import { Button } from "../../components/ui/button";
 import type { UserRole, RoleTestResponse } from "../../types/auth";
-import type { CreateMenuItemInput, MenuItemResponse, MenuItemsResponse } from "../../types/menu";
+import type { CreateMenuItemInput, MenuItemResponse, MenuItemsResponse, UpdateMenuItemInput,  DeleteMenuItemResponse } from "../../types/menu";
+
+import { useState } from "react";
+import { Input } from "../../components/ui/input";
+import { Label } from "../../components/ui/label";
 
 
 export default function TestAuthPage() {
-  const {
-    data: session,
-    isPending,
-    error,
-  } = authClient.useSession();
+  const {data: session, isPending, error} = authClient.useSession();
+  const [menuItemId, setMenuItemId] = useState<string>("");
 
   if (isPending) {
     return <div>Loading session...</div>;
@@ -152,6 +153,89 @@ const testGetMyMenuItems = async (): Promise<void> => {
     }
 };
 
+const testUpdateMenuItem = async (): Promise<void> => {
+    try {
+        if (!menuItemId.trim()) {
+            console.error("Please provide a menu item ID.");
+            return;
+        }
+
+        const { data, error } = await authClient.token();
+
+        if (error || !data?.token) {
+            console.error("Failed to retrieve JWT.");
+            return;
+        }
+
+        const updatedData: UpdateMenuItemInput = {
+            price: 750,
+        };
+
+        const res = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/menu-items/${menuItemId.trim()}`,
+            {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${data.token}`,
+                },
+                body: JSON.stringify(updatedData),
+            }
+        );
+
+        const result: MenuItemResponse = await res.json();
+
+        console.log("Status:", res.status);
+        console.log("Response:", result);
+
+    } catch (error: unknown) {
+        console.error("Update menu item test failed:", error);
+    }
+};
+
+const testDeleteMenuItem = async (): Promise<void> => {
+    try {
+        if (!menuItemId.trim()) {
+            console.error("Please provide a menu item ID.");
+            return;
+        }
+
+        const confirmed = window.confirm(
+            "Delete this test menu item?"
+        );
+
+        if (!confirmed) {
+            return;
+        }
+
+        const { data, error } = await authClient.token();
+
+        if (error || !data?.token) {
+            console.error("Failed to retrieve JWT.");
+            return;
+        }
+
+        const res = await fetch(
+            `${process.env.NEXT_PUBLIC_API_URL}/menu-items/${menuItemId.trim()}`,
+            {
+                method: "DELETE",
+                headers: {
+                    Authorization: `Bearer ${data.token}`,
+                },
+            }
+        );
+
+        const result: DeleteMenuItemResponse =
+            await res.json();
+
+        console.log("Status:", res.status);
+        console.log("Response:", result);
+
+    } catch (error: unknown) {
+        console.error("Delete menu item test failed:", error);
+    }
+};
+
   return (
     <div>
       <h1>Authentication Test</h1>
@@ -197,7 +281,43 @@ const testGetMyMenuItems = async (): Promise<void> => {
     onClick={testGetMyMenuItems}
 >
     Test Get My Menu Items
-</Button>
+</Button> 
+</div>
+
+
+<div className="mt-6 space-y-4 rounded-xl border p-4">
+    <div className="space-y-2">
+        <Label htmlFor="menuItemId">
+            Menu Item ID
+        </Label>
+
+        <Input
+            id="menuItemId"
+            value={menuItemId}
+            onChange={(e) =>
+                setMenuItemId(e.target.value)
+            }
+            placeholder="Enter MongoDB menu item ID"
+        />
+    </div>
+
+    <div className="flex flex-wrap gap-3">
+        <Button
+            variant="outline"
+            onClick={testUpdateMenuItem}
+            disabled={!menuItemId.trim()}
+        >
+            Test Update Menu Item
+        </Button>
+
+        <Button
+            variant="destructive"
+            onClick={testDeleteMenuItem}
+            disabled={!menuItemId.trim()}
+        >
+            Test Delete Menu Item
+        </Button>
+    </div>
 </div>
     </div>
   );
