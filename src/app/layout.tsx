@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Outfit, DM_Sans, Caveat } from "next/font/google";
 import "./globals.css";
+import { Toaster } from "../components/ui/sonner";
 
 const outfit = Outfit({
   subsets: ["latin"],
@@ -31,7 +32,14 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="en"
       className={`${outfit.variable} ${dmSans.variable} ${caveat.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        {children}
+        <Toaster
+          position="top-right"
+          richColors
+          closeButton
+        />
+      </body>
     </html>
   );
 }

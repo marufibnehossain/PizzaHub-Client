@@ -13,9 +13,10 @@ interface ImageUploaderProps {
     images: string[];
     onChange: (images: string[]) => void;
     onUploadingChange?: (isUploading: boolean) => void;
+    disabled?: boolean;
 }
 
-export default function ImageUploader({ images, onChange, onUploadingChange }: ImageUploaderProps) {
+export default function ImageUploader({ images, onChange, onUploadingChange, disabled = false }: ImageUploaderProps) {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [isUploading, setIsUploading] = useState<boolean>(false);
     const [errorMessage, setErrorMessage] = useState<string>("");
@@ -27,7 +28,7 @@ export default function ImageUploader({ images, onChange, onUploadingChange }: I
 
         event.target.value = "";
 
-        if (files.length === 0 || isUploading) {
+        if (files.length === 0 || isUploading || disabled) {
             return;
         }
 
@@ -109,7 +110,7 @@ export default function ImageUploader({ images, onChange, onUploadingChange }: I
                 accept="image/jpeg,image/png,image/webp"
                 multiple
                 onChange={handleFileChange}
-                disabled={isUploading || remainingSlots <= 0}
+                disabled={disabled || isUploading || remainingSlots <= 0}
                 className="hidden"
             />
 
@@ -140,7 +141,7 @@ export default function ImageUploader({ images, onChange, onUploadingChange }: I
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
                     disabled={
-                        isUploading || remainingSlots <= 0
+                        disabled || isUploading || remainingSlots <= 0
                     }
                     className="mt-5 cursor-pointer rounded-full px-6"
                 >
@@ -208,7 +209,7 @@ export default function ImageUploader({ images, onChange, onUploadingChange }: I
                                 type="button"
                                 variant="ghost"
                                 size="icon"
-                                disabled={isUploading}
+                                disabled={disabled || isUploading}
                                 onClick={() =>
                                     handleRemoveImage(index)
                                 }

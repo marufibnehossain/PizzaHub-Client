@@ -58,3 +58,11 @@ export interface DeleteMenuItemResponse {
     success: boolean;
     message: string;
 }
+
+export interface MenuFormValues {
+    itemName: string;
+    category: MenuCategory | "";
+    description: string;
+    price: string;
+    location: string;
+}

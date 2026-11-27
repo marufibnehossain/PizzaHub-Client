@@ -35,7 +35,7 @@ export const DASHBOARD_NAVIGATION: Record<UserRole, DashboardNavItem[]> = {
             label: "Add Menu Item",
             href: "/dashboard/vendor/add-item",
             icon: CirclePlus,
-            enabled: false,
+            enabled: true,
         },
         {
             label: "Manage Orders",
